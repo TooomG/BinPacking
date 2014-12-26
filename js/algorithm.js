@@ -3,10 +3,14 @@
  */
 
 
-var Algorithm = Class.extend({
+var BinPackingAlgorithm = Class.extend({
 	init: function(gridX, gridY) {
 		this.gridX = gridX;
 		this.gridY = gridY;
+	},
+	setDimensions: function(x, y) {
+		this.gridX = x;
+		this.gridY = y;
 	},
 	apply: function(cubes, gridX, gridY) {
 		throw "Unimplemented algorithm.";
@@ -24,12 +28,12 @@ var Algorithm = Class.extend({
 	}
 });
 
-var SortAlgorithm = Algorithm.extend({
+var SortBinPacking = BinPackingAlgorithm.extend({
 	init: function(gridX, gridY, sorter) {
 		this._super(gridX, gridY);
 		this.sorter = sorter;
 	},
-	apply: function(cubes, gridX, gridY) {
+	apply: function(cubes) {
 		var grids = [this.newGrid()];
 		var sortedCubes = this.sorter.sort(cubes);
 
@@ -107,8 +111,10 @@ var CubeSorter = Class.extend({
 		throw "Not implemented!";
 	},
 	sort: function(cubes) {
+		// Insertion sort
 		var result = [];
 		for (var i in cubes) {
+			if (! cubes.hasOwnProperty(i)) continue;
 			var c = cubes[i];
 			var j = 0;
 			for (;j < result.length; ++j ) {
