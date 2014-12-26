@@ -8,7 +8,7 @@ var SimulationViewer = Class.extend({
 		this.ctx = this.canvas.getContext('2d');
 
 		// Default values
-		this.scale = 5;
+		this.scale = 2.5;
 		this.margin = 10;
 
 		this.maxHeight = 0;
@@ -117,7 +117,7 @@ var SimulationViewer = Class.extend({
 			}
 
 			// Setup the boxes positions
-			var placements = this.result.placement[i];
+			var placements = this.result.placements[i];
 			var pi;
 			for (pi in placements) {
 				if (!placements.hasOwnProperty(pi))
@@ -167,16 +167,19 @@ var SimulationViewer = Class.extend({
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
 		// Drawing input boxes
-		this.ctx.strokeStyle = 'red';
+		this.ctx.strokeStyle = 'black';
 		var i, c;
 		for (i = 0; i < this.boxes.length; ++i) {
 			c = this.boxes[i];
 
 			this.ctx.fillStyle = c.color;
 			this.ctx.beginPath();
-			this.ctx.rect(Math.floor(c.positionX + c.offsetX),
+			this.ctx.rect(
+				Math.floor(c.positionX + c.offsetX),
 				Math.floor(c.positionY + c.offsetY),
-				c.width * this.scale  - this.ctx.lineWidth, c.height * this.scale - this.ctx.lineWidth);
+				Math.floor(c.width * this.scale  - this.ctx.lineWidth) + 1,
+				Math.floor(c.height * this.scale - this.ctx.lineWidth) + 1
+			);
 			this.ctx.stroke();
 			this.ctx.fill();
 			this.ctx.closePath();
@@ -190,6 +193,7 @@ var SimulationViewer = Class.extend({
 		var x = this.startOfOutput.x, y = this.startOfOutput.y;
 
 		var i;
+		this.ctx.lineWidth = 2;
 		for (i in this.grids) {
 			if (!this.grids.hasOwnProperty(i))
 				continue;
@@ -200,7 +204,12 @@ var SimulationViewer = Class.extend({
 				y += height + this.margin;
 			}
 			this.ctx.beginPath();
-			this.ctx.rect(x, y, width, height);
+			this.ctx.rect(
+				Math.floor(x),
+				Math.floor(y),
+				Math.floor(width),
+				Math.floor(height)
+			);
 			this.ctx.stroke();
 
 			x += width + this.margin;

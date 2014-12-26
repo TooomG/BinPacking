@@ -26,7 +26,7 @@ var App = Class.extend({
 
 		if (autoPlay) this.viewer.doMoveBoxes();
 	},
-	doRandomSimulation: function() {
+	doRandomSimulation: function(autoPlay) {
 		var dimensions = {
 			width: 20,
 			height: 20

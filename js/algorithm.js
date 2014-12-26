@@ -25,6 +25,23 @@ var BinPackingAlgorithm = Class.extend({
 			grid.push(line);
 		}
 		return grid;
+	},
+	canPlaceAt: function(box, grid, x, y) {
+		// Browse all the cells that the box would occupy
+		for (var j = y; j < y+box.height; ++j) {
+			for (var i = x; i < x+box.width; ++i) {
+				if (grid[j][i] != 0) return false;	// occupation test
+			}
+		}
+		return true;
+	},
+	placeAt: function(box, grid, x, y) {
+		// Browse all the cells that the box will occupy
+		for (var j = y; j < y+box.height; ++j) {
+			for (var i = x; i < x+box.width; ++i) {
+				grid[j][i] = 1;
+			}
+		}
 	}
 });
 
@@ -33,13 +50,13 @@ var SortBinPacking = BinPackingAlgorithm.extend({
 		this._super(gridX, gridY);
 		this.sorter = sorter;
 	},
-	apply: function(boxes) {
+	apply: function(boxes, gridX, gridY) {
 		var grids = [this.newGrid()];
 		var sortedBoxes = this.sorter.sort(boxes);
 
 		var result = {
 			grids: grids,
-			placement: [[]]
+			placements: [[]]
 		};
 
 		for (var i in sortedBoxes) {
@@ -58,7 +75,8 @@ var SortBinPacking = BinPackingAlgorithm.extend({
 		}
 		//console.log("Placing "+box.width+","+box.height);
 		// Try to place in each grid
-		for (var gi in grids) {
+		var gi;
+		for (gi in grids) {
 			if (! grids.hasOwnProperty(gi)) continue;
 			var grid = grids[gi];
 			// Browse the cells of the grid to try to place the box
@@ -67,7 +85,7 @@ var SortBinPacking = BinPackingAlgorithm.extend({
 					if (this.canPlaceAt(box, grid, columnI, lineI)) {
 						//console.log("At ", columnI, lineI);
 						this.placeAt(box, grid, columnI, lineI);
-						result.placement[gi].push({boxID:box.id, x:columnI, y: lineI});
+						result.placements[gi].push({boxID:box.id, x:columnI, y: lineI});
 						return true;
 					}
 				}
@@ -78,28 +96,11 @@ var SortBinPacking = BinPackingAlgorithm.extend({
 		//console.log("Creating new grid");
 		var newGrid = this.newGrid();
 		this.placeAt(box, newGrid, 0, 0);
-		result.placement.push([]);
-		result.placement[result.placement.length-1].push({boxID:box.id, x:0, y: 0});
+		result.placements.push([]);
+		result.placements[result.placements.length-1].push({boxID:box.id, x:0, y: 0});
 		grids.push(newGrid);
 
 		return true;
-	},
-	canPlaceAt: function(box, grid, x, y) {
-		// Browse all the cells that the box would occupy
-		for (var j = y; j < y+box.height; ++j) {
-			for (var i = x; i < x+box.width; ++i) {
-				if (grid[j][i] != 0) return false;	// occupation test
-			}
-		}
-		return true;
-	},
-	placeAt: function(box, grid, x, y) {
-		// Browse all the cells that the box will occupy
-		for (var j = y; j < y+box.height; ++j) {
-			for (var i = x; i < x+box.width; ++i) {
-				grid[j][i] = 1;
-			}
-		}
 	}
 });
 
