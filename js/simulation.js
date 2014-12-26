@@ -3,7 +3,7 @@
  */
 
 
-var Model = Class.extend({
+var Simulation = Class.extend({
 	init: function() {
 		this.cubes = [];
 		this.width = null;
@@ -12,6 +12,9 @@ var Model = Class.extend({
 	setup: function(width, height, cubes) {
 		this.width = width;
 		this.height = height;
+	},
+	setCubes: function(cubes) {
 		this.cubes = cubes;
 	}
 });
+
