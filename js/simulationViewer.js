@@ -4,7 +4,7 @@
 
 var SimulationViewer = Class.extend({
 	init: function (canvasID) {
-		this.canvas = document.getElementById("main")
+		this.canvas = document.getElementById("main");
 		this.ctx = this.canvas.getContext('2d');
 
 		// Default values
