@@ -16,15 +16,15 @@
 <canvas id="main" width="800" height="600" style="border:1px solid blue;"></canvas>
 
 <script type="text/javascript">
-    var dimensions = {
+    /*var dimensions = {
         width: 200,
         height: 200
     };
     var cubesCount = 10;
     var algo = new SortBinPacking(dimensions.width, dimensions.height, new HeightSorter());
-
+    */
     /*
-     var cubes = [{
+     var boxes = [{
      width: 1,
      height: 2,
      color: 'red'
@@ -73,7 +73,7 @@
 
         cubes = (new HeightSorter()).sort(cubes);
 
-        // Update the cubes indexes
+        // Update the boxes indexes
         for (var ci in cubes) {
             if (!cubes.hasOwnProperty(ci)) continue;
             cubes[ci].id = ci;
@@ -123,10 +123,10 @@
         }
 
         /**
-         * Setup the cubes to their initial positions
+         * Setup the boxes to their initial positions
          */
         function setupCubesPositions() {
-            // Drawing input cubes
+            // Drawing input boxes
             var x = margin;
             var y = rowHeight + margin;
             for (i = 0; i < cubes.length; ++i) {
@@ -150,7 +150,7 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Drawing input cubes
+            // Drawing input boxes
             ctx.strokeStyle = 'red';
             for (i = 0; i < cubes.length; ++i) {
                 c = cubes[i];
@@ -202,7 +202,7 @@
                     x = margin;
                     y += height + margin;
                 }
-                // Setup the cubes positions
+                // Setup the boxes positions
                 var placements = result.placement[i];
                 var pi;
                 for (pi in placements) {
@@ -213,11 +213,11 @@
                             pi];
                     var cube = cubes[p.
 
-                            cubeID];
+                            boxID];
                     cube.targetX = x + p.x * scale;
                     cube.targetY = y + p.y * scale;
                 }
-                // end of drawing cubes
+                // end of drawing boxes
 
                 x += width + margin;
             }
@@ -248,7 +248,7 @@
         startOfOutput.x = margin;
         startOfOutput.y += margin;
         //setupSolutionAnimation();<
-        //draw(cubes, grids);
+        //draw(boxes, grids);
         var cubesSpace = 0;
         for (var i in cubes) {
             if (!cubes.hasOwnProperty(i)) continue;
@@ -270,6 +270,10 @@
         console.log("Average occupation:" + (occupationSum / simulationCount));
     }
 
+    var app = new App();
+    $(document).ready(function() {
+
+    });
 
 </script>
 

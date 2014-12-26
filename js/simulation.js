@@ -6,7 +6,7 @@
 
 var Simulation = Class.extend({
 	init: function() {
-		this.cubes = [];
+		this.boxes = [];
 		this.width = null;
 		this.height = null;
 	},
@@ -14,8 +14,8 @@ var Simulation = Class.extend({
 		this.width = width;
 		this.height = height;
 	},
-	setCubes: function(cubes) {
-		this.cubes = cubes;
+	setBoxes: function(boxes) {
+		this.boxes = boxes;
 	}
 });
 

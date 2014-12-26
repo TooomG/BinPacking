@@ -13,7 +13,7 @@ var SimulationViewer = Class.extend({
 
 		this.maxHeight = 0;
 
-		this.cubes = null;
+		this.boxes = null;
 		this.grids = null;
 		this.result = null;
 
@@ -21,27 +21,27 @@ var SimulationViewer = Class.extend({
 
 		this.startOfOutput = null; // rendering helper. coordinates of the output rendering anchor.
 	},
-	setCubes: function (cubes) {
+	loadBoxes: function (boxes) {
 		var maxHeight = 0;
-		// Update the cubes indexes
-		for (var ci in cubes) {
-			if (!cubes.hasOwnProperty(ci)) continue;
-			cubes[ci].id = ci;
-			cubes[ci].positionX = 0;
-			cubes[ci].positionY = 0;
-			cubes[ci].offsetX = 0;
-			cubes[ci].offsetY = 0;
-			cubes[ci].targetX = 0;
-			cubes[ci].targetY = 0;
+		// Update the boxes indexes
+		for (var ci in boxes) {
+			if (!boxes.hasOwnProperty(ci)) continue;
+			boxes[ci].id = ci;
+			boxes[ci].positionX = 0;
+			boxes[ci].positionY = 0;
+			boxes[ci].offsetX = 0;
+			boxes[ci].offsetY = 0;
+			boxes[ci].targetX = 0;
+			boxes[ci].targetY = 0;
 
-			// Let's calculate max cube height
-			if (cubes[ci].height > maxHeight) maxHeight = cubes[ci].height;
+			// Let's calculate max box height
+			if (boxes[ci].height > maxHeight) maxHeight = boxes[ci].height;
 		}
 		// Store the max height for rendering purposes
 		this.maxHeight = maxHeight;
 		this.rowHeight = maxHeight * this.scale;
 
-		this.cubes = cubes;
+		this.boxes = boxes;
 	},
 	setScale: function (scale) {
 		if (this.maxHeight) this.rowHeight = this.maxHeight * scale;
@@ -62,16 +62,16 @@ var SimulationViewer = Class.extend({
 		});
 	},
 	/**
-	 * Setup the cubes to their initial positions.
+	 * Setup the boxes to their initial positions.
 	 * Returns the starting point of the output.
 	 */
-	setupCubesPositions: function () {
-		// Distribute input cubes
+	setupBoxesPositions: function () {
+		// Distribute input boxes
 		var x = this.margin;
 		var y = this.rowHeight + this.margin;
 		var i;
-		for (i = 0; i < this.cubes.length; ++i) {
-			var c = this.cubes[i];
+		for (i = 0; i < this.boxes.length; ++i) {
+			var c = this.boxes[i];
 			if (x + c.width * this.scale >= this.canvas.width) {
 				x = this.margin;
 				y += this.rowHeight + this.margin;
@@ -80,7 +80,7 @@ var SimulationViewer = Class.extend({
 			c.positionX = x;
 			c.positionY = y - c.height * this.scale;
 
-			// Store initial position apart from the position to draw ghost cubes.
+			// Store initial position apart from the position to draw ghost boxes.
 			c.initialPositionX = x;
 			c.initialPositionY = y;
 
@@ -94,7 +94,7 @@ var SimulationViewer = Class.extend({
 		};
 	},
 	/**
-	 * Compute the final position of the cube according to the output of the algorithm.
+	 * Compute the final position of the box according to the output of the algorithm.
 	 */
 	setupSolutionAnimation: function () {
 		// Bypass if called before result is set.
@@ -116,16 +116,16 @@ var SimulationViewer = Class.extend({
 				y += height + this.margin;	// Increase Y
 			}
 
-			// Setup the cubes positions
+			// Setup the boxes positions
 			var placements = this.result.placement[i];
 			var pi;
 			for (pi in placements) {
 				if (!placements.hasOwnProperty(pi))
 					continue;
 				var p = placements[pi];
-				var cube = this.cubes[p.cubeID];
-				cube.targetX = x + p.x * this.scale;
-				cube.targetY = y + p.y * this.scale;
+				var box = this.boxes[p.boxID];
+				box.targetX = x + p.x * this.scale;
+				box.targetY = y + p.y * this.scale;
 			}
 
 			x += width + this.margin;		// Increase X
@@ -135,22 +135,29 @@ var SimulationViewer = Class.extend({
 		this.canvas.height = y + height + this.margin;
 	},
 
-	moveCube: function (cube, targetX, targetY, callback) {
+	/**
+	 * Perform an animation of a box to a target position.
+	 * @param box
+	 * @param targetX
+	 * @param targetY
+	 * @param callback
+	 */
+	moveBox: function (box, targetX, targetY, callback) {
 		var self = this;
-		$(cube).animate({
-			offsetX: targetX - cube.positionX,
-			offsetY: targetY - cube.positionY
+		$(box).animate({
+			offsetX: targetX - box.positionX,
+			offsetY: targetY - box.positionY
 		}, {
 			duration: this.animationDuration,
-			step: function (cube) {
+			step: function (box) {
 				self.draw();
 			},
 			complete: function () {
-				cube.offsetX = 0;
-				cube.offsetY = 0;
-				cube.positionX = targetX;
-				cube.positionY = targetY;
-				self.draw(/*cubes, grids*/);
+				box.offsetX = 0;
+				box.offsetY = 0;
+				box.positionX = targetX;
+				box.positionY = targetY;
+				self.draw();
 				if (callback) callback();
 			}
 		});
@@ -159,15 +166,13 @@ var SimulationViewer = Class.extend({
 	draw: function () {
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-		// Drawing input cubes
+		// Drawing input boxes
 		this.ctx.strokeStyle = 'red';
 		var i, c;
-		for (i = 0; i < this.cubes.length; ++i) {
-			c = this.cubes[i];
+		for (i = 0; i < this.boxes.length; ++i) {
+			c = this.boxes[i];
 
 			this.ctx.fillStyle = c.color;
-			/*ctx.fillRect(x, y - c.height * scale, c.width * scale, c.height * scale);
-			 ctx.fillRect(x, y - c.height * scale, c.width * scale, c.height * scale);*/
 			this.ctx.beginPath();
 			this.ctx.rect(Math.floor(c.positionX + c.offsetX),
 				Math.floor(c.positionY + c.offsetY),
@@ -203,39 +208,47 @@ var SimulationViewer = Class.extend({
 	},
 
 	/**
-	 * Performs the cube animation.
+	 * Performs the boxes animation for the solution.
 	 */
-	doMoveCubes: function () {
+	doMoveBoxes: function () {
 		var self = this;
-		var cubesAnimation = [];
-		var moveNextCube = function () {
-			if (cubesAnimation.length == 0)
+		var boxesToAnimate = [];
+		var moveNextBox = function () {
+			if (boxesToAnimate.length == 0)
 				return;
-			var cube = cubesAnimation.shift();
-			self.moveCube(cube, cube.targetX, cube.targetY, function () {
-				moveNextCube()
+			var box = boxesToAnimate.shift();
+			self.moveBox(box, box.targetX, box.targetY, function () {
+				moveNextBox()
 			});
 		};
 
-		// Create a queue of cubes that has to be moved.
+		// Create a queue of boxes that has to be moved.
 		var i;
-		for (i in this.cubes) {
-			if (!this.cubes.hasOwnProperty(i)) continue;
-			cubesAnimation.push(this.cubes[i]);
+		for (i in this.boxes) {
+			if (!this.boxes.hasOwnProperty(i)) continue;
+			boxesToAnimate.push(this.boxes[i]);
 		}
 		// Process the queue
-		moveNextCube();
+		moveNextBox();
 	},
 
+	/**
+	 * Loads the algorithm result and prepare solution rendering.
+	 * @param result
+	 */
 	loadResult: function (result) {
 		this.result = result;
 		this.grids = result.grids;
 
 		this.updateRenderingAnchors();
+		this.draw();
 	},
 
+	/**
+	 * Updates the coordinates of the anchor of output rendering
+	 */
 	updateRenderingAnchors: function() {
-		this.startOfOutput = this.setupCubesPositions();
+		this.startOfOutput = this.setupBoxesPositions();
 
 		// Update the coordinate of output rendering anchor.
 		this.startOfOutput.x = this.margin;
@@ -245,44 +258,47 @@ var SimulationViewer = Class.extend({
 	},
 
 	/**
-	 * Performs a simulation with a given set of cubes.
+	 * Performs a simulation with a given set of boxes.
 	 * For debugging purpose only.
 	 */
-	doSimulation: function (dimensions, cubes, autoPlay) {
+	doSimulation: function (dimensions, boxes, autoPlay) {
 		console.warn("SimulationViewer.doSimulation() should only be used for debugging purposes.");
 		if (autoPlay === undefined) autoPlay = true;
-		this.setCubes(cubes);
+		this.loadBoxes(boxes);
 
 		var algorithm = new SortBinPacking(dimensions.width, dimensions.height, new HeightSorter());
 		console.log("Computing result...");
-		var result = algorithm.apply(cubes);
+		var result = algorithm.apply(boxes);
 		console.log("Solution found!");
 
 		this.loadResult(result);
 		this.draw();
+
+		if (autoPlay) this.doMoveBoxes();
 	},
 	doRandomSimulation: function (autoPlay) {
+		throw "deprecated";
 		console.warn("SimulationViewer.doRandomSimulation() should only be used for debugging purposes.");
 		var dimensions = {
 			width: 20,
 			height: 20
 		};
-		var cubesCount = 100;
+		var boxesCount = 100;
 
-		var cubes = [];
-		for (var i = 0; i < cubesCount; ++i) {
+		var boxes = [];
+		for (var i = 0; i < boxesCount; ++i) {
 			var randX = Math.ceil(Math.random() * dimensions.width), randY = Math.ceil(Math.random() * dimensions.height);
 			var r = Math.ceil(Math.random() * 255), g = Math.ceil(Math.random() * 255), b = Math.ceil(Math.random() * 255);
-			cubes.push({
+			boxes.push({
 				width: randX,
 				height: randY,
 				color: 'rgb(' + r + ',' + g + ',' + b + ')'
 			});
 		}
-		this.doSimulation(dimensions, cubes, autoPlay);
+		this.doSimulation(dimensions, boxes, autoPlay);
 	},
 	doSampleSimulation: function (autoPlay) {
-		var cubes = [{
+		var boxes = [{
 			width: 1,
 			height: 2,
 			color: 'red'
@@ -318,6 +334,6 @@ var SimulationViewer = Class.extend({
 		this.doSimulation({
 			width: 4,
 			height: 4
-		}, cubes);
+		}, boxes);
 	}
 });
