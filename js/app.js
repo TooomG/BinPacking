@@ -13,10 +13,10 @@ var App = Class.extend({
 	setDimensions: function(x, y) {
 		this.algorithm.setDimensions(x, y);
 	},
-	doSimulation: function (dimensions, boxes, autoPlay) {
+	doSimulation: function (dimensions, boxes, duration, autoPlay) {
 		if (autoPlay === undefined) autoPlay = true;
 		this.viewer.loadBoxes(boxes);
-
+		this.viewer.setDuration(duration);
 		//var algorithm = new SortBinPacking(dimensions.width, dimensions.height, new HeightSorter());
 		console.log("Computing result...");
 		var result = this.algorithm.apply(boxes);
@@ -26,14 +26,14 @@ var App = Class.extend({
 
 		if (autoPlay) this.viewer.doMoveBoxes();
 	},
-	doRandomSimulation: function(autoPlay) {
+	doRandomSimulation: function(_width, _height, _boxes, _boxesCount, _duration, autoPlay) {
 		var dimensions = {
-			width: 20,
-			height: 20
+			width: _width,
+			height: _height
 		};
-		var boxesCount = 100;
+		var boxesCount = _boxesCount;
 
-		var boxes = [];
+		var boxes = _boxes;
 		for (var i = 0; i < boxesCount; ++i) {
 			var randX = Math.ceil(Math.random() * dimensions.width), randY = Math.ceil(Math.random() * dimensions.height);
 			var r = Math.ceil(Math.random() * 255), g = Math.ceil(Math.random() * 255), b = Math.ceil(Math.random() * 255);
@@ -43,6 +43,6 @@ var App = Class.extend({
 				color: 'rgb(' + r + ',' + g + ',' + b + ')'
 			});
 		}
-		this.doSimulation(dimensions, boxes, autoPlay);
+		this.doSimulation(dimensions, boxes, _duration, autoPlay);
 	}
 });

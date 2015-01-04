@@ -21,6 +21,9 @@ var SimulationViewer = Class.extend({
 
 		this.startOfOutput = null; // rendering helper. coordinates of the output rendering anchor.
 	},
+	setDuration: function(_duration) {
+		this.animationDuration = _duration;
+	},
 	loadBoxes: function (boxes) {
 		var maxHeight = 0;
 		// Update the boxes indexes

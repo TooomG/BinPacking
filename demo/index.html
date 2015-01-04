@@ -2,286 +2,86 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
-    <title></title>
+    <title>Complexity Project</title>
     <script src="../js/jquery.min.js"></script>
     <script src="../js/class.js"></script>
     <script src="../js/algorithm.js"></script>
     <script src="../js/simulation.js"></script>
     <script src="../js/simulationViewer.js"></script>
     <script src="../js/app.js"></script>
-
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,300' rel='stylesheet' type='text/css' />
+	<link href='style.css' rel='stylesheet' type='text/css'/>
 </head>
 <body>
-<h1>2D Bin Packing demo</h1>
-<p>The purpose of this algorithm is to fit a given set of boxes into a minimum number of containers of constant dimensions.</p>
-<canvas id="main" width="800" height="600" style="border:1px solid blue;"></canvas>
+<header>
+	<h1>2D Bin Packing demo</h1>
+	<p>The purpose of this algorithm is to fit a given set of boxes into a minimum number of containers of constant dimensions.</p>
+</header>
+<div id="content">
+	<form name="preferences" id="preferences">
+		<legend><h2>Please, choose settings of boxes</h2></legend>
+		<label target="width">Width of Box : </label><input type="text" name="width" value="20"></input>
+		<label target="height">Height of Box : </label><input type="text" name="height" value="20"></input>
+		<label target="boxescount">Number of Element : </label><input type="text" name="boxescount" value="80"></input>
+		<label target="duration">Duration (in second) : </label><input type="text" name="duration" value="4"></input>
+		<input type="button" id="lancement" value="Valider" />
+	</form>
+	<canvas id="main" width="800" height="500" ></canvas>
+	<button id="redo" >Make a demo again</button>
+</div>
+<footer>
+
+</footer>
 
 <script type="text/javascript">
-    /*var dimensions = {
-        width: 200,
-        height: 200
-    };
-    var cubesCount = 10;
-    var algo = new SortBinPacking(dimensions.width, dimensions.height, new HeightSorter());
-    */
-    /*
-     var boxes = [{
-     width: 1,
-     height: 2,
-     color: 'red'
-     }, {
-     width: 2,
-     height: 1,
-     color: 'green'
-     }, {
-     width: 2,
-     height: 1,
-     color: 'blue'
-     }, {
-     width: 3,
-     height: 1,
-     color: 'pink'
-     }, {
-     width: 1,
-     height: 2,
-     color: 'purple'
-     }, {
-     width: 1,
-     height: 3,
-     color: 'yellow'
-     }, {
-     width: 1,
-     height: 1,
-     color: 'brown'
-     }, {
-     width: 2,
-     height: 1,
-     color: 'grey'
-     }];*/
-
-
-    function doSimulation() {
-        var cubes = [];
-        for (var randI = 0; randI < cubesCount; ++randI) {
-            var randX = Math.ceil(Math.random() * dimensions.width), randY = Math.ceil(Math.random() * dimensions.height);
-            var r = Math.ceil(Math.random() * 255), g = Math.ceil(Math.random() * 255), b = Math.ceil(Math.random() * 255);
-            cubes.push({
-                width: randX,
-                height: randY,
-                color: 'rgb(' + r + ',' + g + ',' + b + ')'
-            });
-        }
-
-        cubes = (new HeightSorter()).sort(cubes);
-
-        // Update the boxes indexes
-        for (var ci in cubes) {
-            if (!cubes.hasOwnProperty(ci)) continue;
-            cubes[ci].id = ci;
-            cubes[ci].positionX = 0;
-            cubes[ci].positionY = 0;
-            cubes[ci].offsetX = 0;
-            cubes[ci].offsetY = 0;
-            cubes[ci].targetX = 0;
-            cubes[ci].targetY = 0;
-        }
-
-        var i, c;   // iterator variables
-
-        var maxHeight = 0;
-        for (i in cubes) {
-            if (!cubes.hasOwnProperty(i)) continue;
-            c = cubes[i];
-            if (c.height > maxHeight) maxHeight = c.height;
-        }
-
-        var canvas = document.getElementById("main"), ctx = canvas.getContext('2d');
-
-        var scale = 5;
-
-        var rowHeight = maxHeight * scale;
-
-        var margin = 10;
-
-        function moveCube(cube, targetX, targetY, callback) {
-            $(cube).animate({
-                offsetX: targetX - cube.positionX,
-                offsetY: targetY - cube.positionY
-            }, {
-                duration: 700,
-                step: function (cube) {
-                    draw(cubes, grids);
-                },
-                complete: function () {
-                    cube.offsetX = 0;
-                    cube.offsetY = 0;
-                    cube.positionX = targetX;
-                    cube.positionY = targetY;
-                    draw(cubes, grids);
-                    if (callback) callback();
-                }
-            });
-        }
-
-        /**
-         * Setup the boxes to their initial positions
-         */
-        function setupCubesPositions() {
-            // Drawing input boxes
-            var x = margin;
-            var y = rowHeight + margin;
-            for (i = 0; i < cubes.length; ++i) {
-                c = cubes[i];
-                if (x + c.width * scale >= canvas.width) {
-                    x = margin;
-                    y += rowHeight + margin;
-                }
-
-                c.positionX = x;
-                c.positionY = y - c.height * scale;
-
-                x += c.width * scale + margin;
-            }
-            return {
-                x: x,
-                y: y
-            };
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Drawing input boxes
-            ctx.strokeStyle = 'red';
-            for (i = 0; i < cubes.length; ++i) {
-                c = cubes[i];
-
-                ctx.fillStyle = c.color;
-                /*ctx.fillRect(x, y - c.height * scale, c.width * scale, c.height * scale);
-                 ctx.fillRect(x, y - c.height * scale, c.width * scale, c.height * scale);*/
-                ctx.beginPath();
-                ctx.rect(c.positionX + c.offsetX, c.positionY + c.offsetY, c.width * scale, c.height * scale);
-                ctx.stroke();
-                ctx.fill();
-                ctx.closePath();
-            }
-            ctx.strokeStyle = 'black';
-            drawGrid();
-        }
-
-        function drawGrid() {
-            if (!startOfOutput) return;
-            var x = startOfOutput.x, y = startOfOutput.y;
-            for (i in grids) {
-                if (!grids.hasOwnProperty(i))
-                    continue;
-                var g = grids[i];
-                var width = g[0].length * scale, height = g.length * scale;
-                if (x + width >= canvas.width) {
-                    x = margin;
-                    y += height + margin;
-                }
-                ctx.beginPath();
-                ctx.
-
-                        rect(x, y, width, height);
-                ctx.stroke();
-                x += width + margin;
-            }
-        }
-
-        function prepareSolutionAnimation() {
-            // Now, draw the grids
-            var x = startOfOutput.x, y = startOfOutput.y;
-            for (i in grids) {
-                if (!grids.hasOwnProperty(i)) continue;
-                var g = grids[i];
-                var width = g[0].length *
-
-                        scale, height = g.length * scale;
-                if (x + width >= canvas.width) {
-                    x = margin;
-                    y += height + margin;
-                }
-                // Setup the boxes positions
-                var placements = result.placements[i];
-                var pi;
-                for (pi in placements) {
-                    if (!placements.hasOwnProperty(pi))
-                        continue;
-                    var p = placements[
-
-                            pi];
-                    var cube = cubes[p.
-
-                            boxID];
-                    cube.targetX = x + p.x * scale;
-                    cube.targetY = y + p.y * scale;
-                }
-                // end of drawing boxes
-
-                x += width + margin;
-            }
-        }
-
-        function doMoveCubes() {
-            var cubesAnimation = [];
-            var moveNextCube = function () {
-                if (cubesAnimation.length == 0)
-                    return;
-                var cube = cubesAnimation.shift();
-                moveCube(cube, cube.targetX, cube.targetY, function () {
-                            moveNextCube()
-                        });
-            };
-            for (var i in cubes) {
-                if (!cubes.hasOwnProperty(i)) continue;
-                cubesAnimation.push(cubes[i]);
-            }
-            moveNextCube();
-        }
-
-        var result = algo.apply(cubes);
-        var grids = result.grids;
-
-        var startOfOutput = setupCubesPositions();
-
-        startOfOutput.x = margin;
-        startOfOutput.y += margin;
-        //setupSolutionAnimation();<
-        //draw(boxes, grids);
-        var cubesSpace = 0;
-        for (var i in cubes) {
-            if (!cubes.hasOwnProperty(i)) continue;
-            cubesSpace += cubes[i].width * cubes[i].height;
-        }
-        var containersSpace = result.grids.length * result.grids[0].length * result.grids[0][0].length;
-        //console.log("Occupation : " + (100 * cubesSpace / containersSpace) + "% (" + cubesSpace + "/" + containersSpace + ")");
-        return (100 * cubesSpace / containersSpace);
-    }
-
-    function benchmark() {
-        var simulationCount = 1000;
-        var occupationSum = 0;
-        for (var i = 1; i <= simulationCount; ++i) {
-            occupationSum += doSimulation();
-            console.log("Average occupation[" + i + "]:" + (occupationSum / (i)));
-        }
-
-        console.log("Average occupation:" + (occupationSum / simulationCount));
-    }
-
-    var app = new App();
-    var dimensions = {
-        width: 20,
-        height: 20
-    };
-    var algo = new SortBinPacking(dimensions.width, dimensions.height, new HeightSorter());
-    app.setAlgorithm(algo);
-    $(document).ready(function() {
-        app.doRandomSimulation(dimensions.width, dimensions.height, [], true);
-    });
-
+	jQuery(document).ready(function(){
+		jQuery("#main").hide();
+		jQuery("#redo").hide();
+	});
+	
+	jQuery("#redo").click(function(){
+		jQuery("#main").hide();
+		jQuery("#redo").hide();
+		jQuery("#preferences").show();
+	});
+	
+	var app = new App();
+    
+    jQuery("#lancement").click(function(){
+		jQuery("#preferences").hide();
+		jQuery("#main").show();
+		jQuery("#redo").show();
+		// Convert input into Integer
+		var _width = parseInt(document.preferences.width.value);
+		var _height = parseInt(document.preferences.height.value);
+		var _boxesCount = parseInt(document.preferences.boxescount.value);
+		var _duration = parseInt(document.preferences.duration.value)*100;
+		
+		// Check if input is an integer or simple text
+		if( _width === ~~_width && _height === ~~_height) {
+			var dimensions = {
+				width: _width,
+				height: _height
+			};
+		} else {
+			var dimensions = {
+				width: 20,
+				height: 20
+			};
+		}
+		
+		// Check if input for number of boxes is an Integer
+		var boxesCount;
+		_boxesCount===~~_boxesCount?boxesCount=_boxesCount:boxesCount=80;
+		
+		// Check if input for duration is an Integer
+		var duration;
+		_duration===~~_duration?duration=_duration:duration=400;
+		
+		var algo = new SortBinPacking(dimensions.width, dimensions.height, new HeightSorter());
+		app.setAlgorithm(algo);
+        app.doRandomSimulation(dimensions.width, dimensions.height, [], boxesCount, duration, true);
+	});
 </script>
 
 </body>
